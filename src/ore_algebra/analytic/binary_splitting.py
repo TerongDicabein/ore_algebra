@@ -523,6 +523,9 @@ class SolutionColumn(object):
         # column is really used
         self.v.zero_sum, self.v.sums_row = rec.Series_sums(self.v.ord_log)
 
+    def __repr__(self):
+        return "SolutionColumn" + repr(self.v)
+
     def assert_well_formed(self):
         assert self.v.rec_mat.degree() < self.v.ord_log
         assert len(self.v.sums_row[-1]) == self.v.ord_log
