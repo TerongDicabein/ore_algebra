@@ -210,7 +210,7 @@ def series_sum(dop, ini, pt, tgt_error, maj=None, bwrec=None, stop=None,
     if bwrec is None:
         bwrec = bw_shift_rec(dop, shift=ini.expo)
     if stop is None:
-        stop = accuracy.StoppingCriterion(maj, tgt_error.eps)
+        stop = accuracy.StoppingCriterion_eps(maj, tgt_error.eps)
 
     ctx = Context(**kwds)
 
@@ -352,13 +352,12 @@ def interval_series_sum_wrapper(dop, inis, pt, tgt_error, bwrec, stop,
     err=None
     for attempt in count(1):
         Intervals = ivs(bit_prec)
-        ini_are_accurate = 2*input_accuracy > bit_prec
         # Strictly decrease eps every time to avoid situations where doit
         # would be happy with the result and stop at the same point despite
-        # the higher bit_prec. Since attempt starts at 1, we have a bit of
-        # room for round-off errors.
-        stop.reset(tgt_error.eps >> (4*attempt),
-                   stop.fast_fail and ini_are_accurate)
+        # the higher bit_prec. Doing that even in the first iteration gives us a
+        # bit of room for round-off errors.
+        ini_are_accurate = 2*input_accuracy > bit_prec
+        stop.tighten(ini_are_accurate)
 
         if _use_inexact_recurrence(bwrec, bit_prec):
             bwrec1 = bwrec.change_base(Intervals)
@@ -451,7 +450,7 @@ def fundamental_matrix_regular(dop, pt, eps, fail_fast, effort, ctx=dctx):
                             special_shifts=(None if ordinary else self.shifts),
                             bound_inverse="solve",
                             pol_part_len=(4 if ordinary else None))
-            stop = accuracy.StoppingCriterion(maj, eps_col.eps)
+            stop = accuracy.StoppingCriterion_eps(maj, eps_col.eps)
             # Compute the "highest" (in terms powers of log) solution of each
             # valuation
             inis = [LogSeriesInitialValues(
