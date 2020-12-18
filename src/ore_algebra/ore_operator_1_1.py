@@ -2370,7 +2370,7 @@ class UnivariateDifferentialOperatorOverUnivariateRing(UnivariateOreOperatorOver
         from .analytic.path import Point
         mypoint = Point(point, self)
         dop = DifferentialOperator(self)
-        ldop = dop.shift(mypoint)
+        ldop = dop.shift(mypoint.exact().value)
         if order is None:
             ind = ldop.indicial_polynomial(ldop.base_ring().gen())
             order = max(dop.order(), ind.dispersion()) + 3
